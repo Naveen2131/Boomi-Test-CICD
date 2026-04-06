@@ -17,20 +17,6 @@ jobs:
       - name: Install Python Dependencies
         run: pip install requests
 
-      - name: Verify Boomi Connection
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X GET \
-            "https://api.boomi.com/api/rest/v1/${{ secrets.BOOMI_ACCOUNT_ID }}" \
-            -u "${{ secrets.BOOMI_USERNAME }}:${{ secrets.BOOMI_PASSWORD }}")
-
-          echo "Status: $STATUS"
-
-          if [ "$STATUS" != "200" ]; then
-            echo "Connection failed"
-            exit 1
-          fi
-
       - name: Deploy to Boomi
         env:
           BOOMI_ACCOUNT_ID: ${{ secrets.BOOMI_ACCOUNT_ID }}
