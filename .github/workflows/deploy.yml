@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -34,23 +33,27 @@ jobs:
 
       - name: Parse Components File
         run: |
-          python3 - <<'EOF'
-          import json
-          with open('configs/components.json') as f:
-              data = json.load(f)
-          lines = []
-          for c in data['components']:
-              entry = '~~~'.join([
-                  c['componentId'],
-                  c['packageVersion'],
-                  c.get('notes', 'Deployed via GitHub Actions'),
-                  c['name']
-              ])
-              lines.append(entry)
-          with open('/tmp/components.txt', 'w') as f:
-              f.write('\n'.join(lines))
-          print(f"Found {len(lines)} component(s) to deploy")
-          EOF
+          python3 <<EOF
+import json
+
+with open('configs/components.json') as f:
+    data = json.load(f)
+
+lines = []
+for c in data['components']:
+    entry = '~~~'.join([
+        c['componentId'],
+        c['packageVersion'],
+        c.get('notes', 'Deployed via GitHub Actions'),
+        c['name']
+    ])
+    lines.append(entry)
+
+with open('/tmp/components.txt', 'w') as f:
+    f.write('\n'.join(lines))
+
+print(f"Found {len(lines)} component(s) to deploy")
+EOF
 
       - name: Deploy to Boomi
         run: |
@@ -63,13 +66,11 @@ jobs:
           FAILED=0
 
           while IFS='~~~' read -r COMP_ID VERSION NOTES NAME; do
-
             echo "========================================"
             echo "Component : $NAME"
             echo "ID        : $COMP_ID"
             echo "Version   : ${VERSION}.${RUN_NUMBER}"
 
-            # ── Create Package ──
             echo "Creating package..."
             PKG_BODY=$(curl -s \
               -X POST \
@@ -87,13 +88,14 @@ jobs:
               continue
             fi
 
-            PKG_ID=$(echo "$PKG_BODY" | python3 -c \
-              "import sys,json
+            PKG_ID=$(echo "$PKG_BODY" | python3 -c "
+import sys, json
 d=json.load(sys.stdin)
 if '@type' in d and d['@type']=='Error':
     print('ERROR:'+d.get('message','Unknown error'))
 else:
-    print(d.get('packageId',''))")
+    print(d.get('packageId',''))
+")
 
             if [[ "$PKG_ID" == ERROR:* ]]; then
               echo "ERROR from Boomi: ${PKG_ID#ERROR:}"
@@ -109,7 +111,6 @@ else:
 
             echo "Package created: $PKG_ID"
 
-            # ── Deploy Package ──
             echo "Deploying..."
             DEPLOY_BODY=$(curl -s \
               -X POST \
@@ -121,13 +122,14 @@ else:
 
             echo "Deploy response: $DEPLOY_BODY"
 
-            DEPLOY_CHECK=$(echo "$DEPLOY_BODY" | python3 -c \
-              "import sys,json
+            DEPLOY_CHECK=$(echo "$DEPLOY_BODY" | python3 -c "
+import sys, json
 d=json.load(sys.stdin)
 if '@type' in d and d['@type']=='Error':
     print('ERROR:'+d.get('message','Unknown error'))
 else:
-    print('OK')")
+    print('OK')
+")
 
             if [[ "$DEPLOY_CHECK" == ERROR:* ]]; then
               echo "DEPLOY ERROR: ${DEPLOY_CHECK#ERROR:}"
@@ -145,4 +147,5 @@ else:
             echo "One or more components failed. Check logs above."
             exit 1
           fi
+
           echo "All components deployed successfully!"
