@@ -2,7 +2,7 @@ name: Deploy to Boomi
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'configs/components.json'
 
