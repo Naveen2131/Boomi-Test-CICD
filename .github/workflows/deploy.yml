@@ -1,0 +1,40 @@
+name: Deploy to Boomi
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'configs/components.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Python Dependencies
+        run: pip install requests
+
+      - name: Verify Boomi Connection
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -u "${{ secrets.BOOMI_USERNAME }}:${{ secrets.BOOMI_PASSWORD }}" \
+            "https://api.boomi.com/api/rest/v1/${{ secrets.BOOMI_ACCOUNT_ID }}/Environment")
+
+          echo "Status: $STATUS"
+
+          if [ "$STATUS" != "200" ]; then
+            echo "Connection failed"
+            exit 1
+          fi
+
+      - name: Deploy to Boomi
+        env:
+          BOOMI_ACCOUNT_ID: ${{ secrets.BOOMI_ACCOUNT_ID }}
+          BOOMI_USERNAME: ${{ secrets.BOOMI_USERNAME }}
+          BOOMI_PASSWORD: ${{ secrets.BOOMI_PASSWORD }}
+          BOOMI_ENV_ID: ${{ secrets.BOOMI_ENV_ID }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: python3 scripts/deploy_boomi.py
