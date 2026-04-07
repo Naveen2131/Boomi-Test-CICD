@@ -18,6 +18,9 @@ def call_api(endpoint, payload):
         auth=(USERNAME, PASSWORD),
         json=payload
     )
+
+    print(f"\n Response: {response}")
+    
     try:
         data = response.json()
     except:
