@@ -55,6 +55,8 @@ def main():
             failed = True
             continue
 
+        print(f"\n--- Package Component Response {pkg} ---")
+
         pkg_id = pkg.get("packageId")
         print(f"Package ID: {pkg_id}")
 
