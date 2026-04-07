@@ -16,10 +16,11 @@ def call_api(endpoint, payload):
     response = requests.post(
         f"{BASE_URL}/{endpoint}",
         auth=(USERNAME, PASSWORD),
-        json=payload
+        json=payload,
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
     )
-
-    print(f"\n Response: {response.packageId}")
+    
+    print(f"\n Response: {response}")
     
     try:
         data = response.json()
