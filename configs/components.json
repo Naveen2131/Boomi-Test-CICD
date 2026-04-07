@@ -3,8 +3,14 @@
     {
       "name": "Test Process",
       "componentId": "5b094949-1b27-473e-97fb-a0b7daac8f32",
-      "packageVersion": "1",
-      "notes": "Test Initial-Deployment 3"
+      "packageVersion": "2",
+      "notes": "Test CI-CD Initial-Deployment"
+    },
+    {
+      "name": "businessRuleValidations",
+      "componentId": "69c51d7b-4145-49ce-963f-019697622922",
+      "packageVersion": "2",
+      "notes": "Test CI-CD Initial-Deployment"
     }
   ]
 }
