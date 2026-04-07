@@ -19,7 +19,7 @@ def call_api(endpoint, payload):
         json=payload
     )
 
-    print(f"\n Response: {response}")
+    print(f"\n Response: {response.packageId}")
     
     try:
         data = response.json()
